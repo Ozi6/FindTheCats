@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class PlanetObject : MonoBehaviour
+public class PlanetObject : MonoBehaviour
 {
     [Header("Planet Object Settings")]
     public float radiusFromCenter = 1f;
@@ -8,20 +8,24 @@ public abstract class PlanetObject : MonoBehaviour
     public float blockingRadius = 0.5f;
 
     protected Planet parentPlanet;
+    private Vector3 originalScale;
 
     public virtual void Initialize(Planet planet)
     {
         parentPlanet = planet;
+        originalScale = transform.localScale;
         PositionOnPlanet();
+        transform.localScale = originalScale;
     }
 
     protected virtual void PositionOnPlanet()
     {
         if (parentPlanet != null)
         {
-            Vector3 direction = transform.position.normalized;
-            transform.position = direction * (parentPlanet.radius + radiusFromCenter);
-            transform.up = direction;
+            Vector3 direction = transform.localPosition.normalized;
+            float surfaceDistance = 0.5f + (radiusFromCenter / parentPlanet.radius);
+            transform.localPosition = direction * surfaceDistance;
+            transform.up = transform.position.normalized;
         }
     }
 

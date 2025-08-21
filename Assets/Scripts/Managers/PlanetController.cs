@@ -5,15 +5,15 @@ public partial class PlanetController : Singleton<PlanetController>
     protected override bool Persistent => false;
 
     [Header("Rotation Settings")]
-    public float rotationSpeed = 50f;
+    public float rotationSpeed = 3000f;
     public float inertia = 0.95f;
-    public float maxRotationSpeed = 200f;
+    public float maxRotationSpeed = 5000f;
 
     [Header("Input Settings")]
     public bool enableMouseInput = true;
     public bool enableTouchInput = true;
 
-    private Camera mainCamera;
+    [SerializeField] private Camera mainCamera;
     private Vector3 lastMousePosition;
     private Vector3 rotationVelocity;
     private bool isDragging = false;

@@ -20,14 +20,14 @@ public class Planet : Singleton<Planet>
 
     void Start()
     {
-        if (planetData != null)
-            GeneratePlanet();
+
     }
 
     public void GeneratePlanet()
     {
         ClearPlanet();
         radius = planetData.planetRadius;
+        transform.localScale = Vector3.one;
 
         meshBuilder = new PlanetMeshBuilder(gameObject, planetData, radius);
         spawner = new PlanetSpawner(this, radius, spawnedObjects, spawnedCats);
@@ -41,9 +41,7 @@ public class Planet : Singleton<Planet>
         foreach (var comp in spawnedObjects.Cast<Component>()
             .Concat(spawnedCats)
             .Concat(spawnedCatHidingObjects))
-        {
             if (comp != null) DestroyImmediate(comp.gameObject);
-        }
 
         spawnedObjects.Clear();
         spawnedCats.Clear();

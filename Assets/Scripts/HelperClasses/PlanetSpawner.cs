@@ -39,7 +39,6 @@ public class PlanetSpawner
         for (int i = 0; i < count; i++)
         {
             if (!TrySpawn(containerPrefab, minDistance, spawnedObjects, out var obj)) continue;
-
             var special = obj.GetComponent<T>() ?? obj.AddComponent<T>();
             AttachCat(special, catPrefab);
             special.Initialize(planet);
@@ -73,7 +72,16 @@ public class PlanetSpawner
         var pos = Random.onUnitSphere * radius;
         if (blockers.All(o => o == null || Vector3.Distance(pos, o.transform.position) >= minDistance))
         {
+            // Parent to planet for rotation, but maintain universal scale
             spawned = Object.Instantiate(prefab, pos, Quaternion.identity, planet.transform);
+            // Calculate the scale needed to counteract planet's scaling
+            Vector3 universalScale = prefab.transform.localScale;
+            Vector3 planetScale = planet.transform.localScale;
+            spawned.transform.localScale = new Vector3(
+                universalScale.x / planetScale.x,
+                universalScale.y / planetScale.y,
+                universalScale.z / planetScale.z
+            );
             return true;
         }
         spawned = null;
@@ -89,10 +97,18 @@ public class PlanetSpawner
                 spawnedObjects.Where(o => o.blocksCats)
                     .All(o => o == null || Vector3.Distance(pos, o.transform.position) >= data.minDistanceFromObjects) &&
                 spawnedCats.All(c => Vector3.Distance(pos, c.transform.position) >= data.minDistanceFromOtherCats);
-
             if (valid)
             {
+                // Parent to planet for rotation, but maintain universal scale
                 spawned = Object.Instantiate(data.catPrefab, pos, Quaternion.identity, planet.transform);
+                // Calculate the scale needed to counteract planet's scaling
+                Vector3 universalScale = data.catPrefab.transform.localScale;
+                Vector3 planetScale = planet.transform.localScale;
+                spawned.transform.localScale = new Vector3(
+                    universalScale.x / planetScale.x,
+                    universalScale.y / planetScale.y,
+                    universalScale.z / planetScale.z
+                );
                 return true;
             }
         }

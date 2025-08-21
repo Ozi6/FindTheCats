@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
-public class CatHuntGameController : MonoBehaviour
+public class CatHuntGameController : Singleton<CatHuntGameController>
 {
+    protected override bool Persistent => false;
+
     [Header("UI References")]
-    public Text catsFoundText;
-    public Text totalCatsText;
+    public TextMeshProUGUI catsFoundText;
+    public TextMeshProUGUI totalCatsText;
     public GameObject winPanel;
     public Button resetButton;
     public Button nextPlanetButton;

@@ -16,7 +16,7 @@ public partial class PlanetController
         Vector3 deltaPosition = inputPosition - lastMousePosition;
         rotationVelocity.x = deltaPosition.x * rotationSpeed / Screen.width;
         rotationVelocity.y = deltaPosition.y * rotationSpeed / Screen.height;
-        rotationVelocity = Vector3.ClampMagnitude(rotationVelocity, maxRotationSpeed);
+        rotationVelocity = -Vector3.ClampMagnitude(rotationVelocity, maxRotationSpeed);
         lastMousePosition = inputPosition;
     }
 

@@ -4,9 +4,9 @@ public class OrbitCamera : MonoBehaviour
 {
     [Header("Orbit Settings")]
     public Transform target;
-    public float distance = 10f;
-    public float minDistance = 5f;
-    public float maxDistance = 20f;
+    public float distance = 50f;
+    public float minDistance = 50f;
+    public float maxDistance = 60f;
 
     [Header("Auto Orbit")]
     public bool autoOrbit = false;
