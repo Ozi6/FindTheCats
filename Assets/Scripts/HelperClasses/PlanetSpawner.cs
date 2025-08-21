@@ -64,7 +64,6 @@ public class PlanetSpawner
         var catObj = Object.Instantiate(catPrefab);
         var cat = catObj.GetComponent<Cat>() ?? catObj.AddComponent<Cat>();
         if (obj is CattedObject c) c.associatedCat = cat;
-        if (obj is CatHidingObject h) h.hiddenCat = cat;
     }
 
     private bool TrySpawn(GameObject prefab, float minDistance, IEnumerable<PlanetObject> blockers, out GameObject spawned)

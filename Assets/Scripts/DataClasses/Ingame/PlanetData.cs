@@ -13,5 +13,4 @@ public class PlanetData : ScriptableObject
     public List<ObjectSpawnData> objectsToSpawn = new List<ObjectSpawnData>();
     public List<CatSpawnData> catsToSpawn = new List<CatSpawnData>();
     public List<CattedObjectSpawnData> cattedObjectsToSpawn = new List<CattedObjectSpawnData>();
-    public List<CatHidingObjectSpawnData> catHidingObjectsToSpawn = new List<CatHidingObjectSpawnData>();
 }

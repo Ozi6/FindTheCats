@@ -16,7 +16,6 @@ public class Planet : Singleton<Planet>
     private readonly List<PlanetObject> spawnedObjects = new();
     private readonly List<Cat> spawnedCats = new();
     private readonly List<CattedObject> spawnedCattedObjects = new();
-    private readonly List<CatHidingObject> spawnedCatHidingObjects = new();
 
     void Start()
     {
@@ -38,15 +37,12 @@ public class Planet : Singleton<Planet>
 
     void ClearPlanet()
     {
-        foreach (var comp in spawnedObjects.Cast<Component>()
-            .Concat(spawnedCats)
-            .Concat(spawnedCatHidingObjects))
+        foreach (var comp in spawnedObjects.Cast<Component>().Concat(spawnedCats))
             if (comp != null) DestroyImmediate(comp.gameObject);
 
         spawnedObjects.Clear();
         spawnedCats.Clear();
         spawnedCattedObjects.Clear();
-        spawnedCatHidingObjects.Clear();
     }
 
     public void GenerateFromData()
@@ -62,21 +58,10 @@ public class Planet : Singleton<Planet>
                 catted.minDistanceFromObjects,
                 spawnedCattedObjects);
 
-        foreach (var hiding in planetData.catHidingObjectsToSpawn)
-            spawner.SpawnSpecial<CatHidingObject>(
-                hiding.containerPrefab,
-                hiding.catPrefab,
-                hiding.count,
-                hiding.minDistanceFromObjects,
-                spawnedCatHidingObjects);
-
         foreach (var cat in planetData.catsToSpawn)
             spawner.SpawnCats(cat);
     }
 
     public List<Cat> GetAllCats() =>
-        spawnedCats
-            .Concat(spawnedCattedObjects.Select(c => c.associatedCat).Where(c => c != null))
-            .Concat(spawnedCatHidingObjects.Select(h => h.hiddenCat).Where(c => c != null))
-            .ToList();
+        spawnedCats.Concat(spawnedCattedObjects.Select(c => c.associatedCat).Where(c => c != null)).ToList();
 }

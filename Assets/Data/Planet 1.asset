@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1eb7ae51e1e09e4ca29a63244e5cbcb, type: 3}
   m_Name: Planet 1
   m_EditorClassIdentifier: 
-  planetRadius: 30
+  planetRadius: 15
   planetMaterial: {fileID: 2100000, guid: 1861451f3579adf4a8f427a8ba0aac17, type: 2}
   hasSplineRoads: 0
   objectsToSpawn:
