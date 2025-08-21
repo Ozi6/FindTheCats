@@ -7,22 +7,22 @@ public abstract class PlanetObject : MonoBehaviour
     public bool blocksCats = true;
     public float blockingRadius = 0.5f;
 
-    //protected Planet parentPlanet;
+    protected Planet parentPlanet;
 
     public virtual void Initialize(Planet planet)
     {
-        //parentPlanet = planet;
+        parentPlanet = planet;
         PositionOnPlanet();
     }
 
     protected virtual void PositionOnPlanet()
     {
-        /*if (parentPlanet != null)
+        if (parentPlanet != null)
         {
             Vector3 direction = transform.position.normalized;
             transform.position = direction * (parentPlanet.radius + radiusFromCenter);
             transform.up = direction;
-        }*/
+        }
     }
 
     public virtual bool CanPlaceAtPosition(Vector3 worldPosition, float minDistance = 1f)

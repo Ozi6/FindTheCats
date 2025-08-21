@@ -22,9 +22,9 @@ public class OrbitCamera : MonoBehaviour
     {
         if (target == null)
         {
-            /*Planet planet = Planet.Instance;
+            Planet planet = Planet.Instance;
             if (planet != null)
-                target = planet.transform;*/
+                target = planet.transform;
         }
         if (target != null)
         {

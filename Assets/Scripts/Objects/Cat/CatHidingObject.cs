@@ -88,7 +88,7 @@ public class CatHidingObject : AnimatedPlanetObject, IClickable
         if (hiddenCat != null)
         {
             hiddenCat.gameObject.SetActive(true);
-            //hiddenCat.Initialize(parentPlanet);
+            hiddenCat.Initialize(parentPlanet);
             hiddenCat.transform.localPosition = Vector3.zero;
         }
     }

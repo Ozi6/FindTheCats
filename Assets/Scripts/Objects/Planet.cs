@@ -1,0 +1,84 @@
+using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Planet : Singleton<Planet>
+{
+    protected override bool Persistent => false;
+
+    [Header("Planet Settings")]
+    public PlanetData planetData;
+    public float radius = 5f;
+
+    private PlanetMeshBuilder meshBuilder;
+    private PlanetSpawner spawner;
+
+    private readonly List<PlanetObject> spawnedObjects = new();
+    private readonly List<Cat> spawnedCats = new();
+    private readonly List<CattedObject> spawnedCattedObjects = new();
+    private readonly List<CatHidingObject> spawnedCatHidingObjects = new();
+
+    void Start()
+    {
+        if (planetData != null)
+            GeneratePlanet();
+    }
+
+    public void GeneratePlanet()
+    {
+        ClearPlanet();
+        radius = planetData.planetRadius;
+
+        meshBuilder = new PlanetMeshBuilder(gameObject, planetData, radius);
+        spawner = new PlanetSpawner(this, radius, spawnedObjects, spawnedCats);
+
+        meshBuilder.SetupPlanetMesh();
+        GenerateFromData();
+    }
+
+    void ClearPlanet()
+    {
+        foreach (var comp in spawnedObjects.Cast<Component>()
+            .Concat(spawnedCats)
+            .Concat(spawnedCatHidingObjects))
+        {
+            if (comp != null) DestroyImmediate(comp.gameObject);
+        }
+
+        spawnedObjects.Clear();
+        spawnedCats.Clear();
+        spawnedCattedObjects.Clear();
+        spawnedCatHidingObjects.Clear();
+    }
+
+    public void GenerateFromData()
+    {
+        foreach (var obj in planetData.objectsToSpawn)
+            spawner.SpawnObjects(obj);
+
+        foreach (var catted in planetData.cattedObjectsToSpawn)
+            spawner.SpawnSpecial<CattedObject>(
+                catted.containerPrefab,
+                catted.catPrefab,
+                catted.count,
+                catted.minDistanceFromObjects,
+                spawnedCattedObjects);
+
+        foreach (var hiding in planetData.catHidingObjectsToSpawn)
+            spawner.SpawnSpecial<CatHidingObject>(
+                hiding.containerPrefab,
+                hiding.catPrefab,
+                hiding.count,
+                hiding.minDistanceFromObjects,
+                spawnedCatHidingObjects);
+
+        foreach (var cat in planetData.catsToSpawn)
+            spawner.SpawnCats(cat);
+    }
+
+    public List<Cat> GetAllCats() =>
+        spawnedCats
+            .Concat(spawnedCattedObjects.Select(c => c.associatedCat).Where(c => c != null))
+            .Concat(spawnedCatHidingObjects.Select(h => h.hiddenCat).Where(c => c != null))
+            .ToList();
+}
