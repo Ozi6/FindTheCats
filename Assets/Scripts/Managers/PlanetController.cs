@@ -26,6 +26,8 @@ public partial class PlanetController : Singleton<PlanetController>
 
     void Update()
     {
+        if (PlanetEditor.Instance != null && PlanetEditor.Instance.IsInPlacementMode())
+            return;
         HandleInput();
         ApplyInertia();
         if (rotationVelocity.magnitude > 0.1f)

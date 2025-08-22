@@ -14,7 +14,6 @@ public class PlanetObject : MonoBehaviour
     {
         parentPlanet = planet;
         originalScale = transform.localScale;
-        PositionOnPlanet();
         transform.localScale = originalScale;
     }
 

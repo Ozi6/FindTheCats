@@ -5,8 +5,10 @@ using TMPro;
 using System.Collections.Generic;
 using System.Linq;
 
-public class PlanetEditor : MonoBehaviour
+public class PlanetEditor : Singleton<PlanetEditor>
 {
+    protected override bool Persistent => false;
+
     [Header("References")]
     public Planet planet;
     public Camera editorCamera;
@@ -20,6 +22,15 @@ public class PlanetEditor : MonoBehaviour
     public TextMeshProUGUI planetSizeText;
     public Button saveButton;
     public Button loadButton;
+
+    [Header("Object Manipulation UI")]
+    public GameObject manipulationPanel;
+    public Button deleteButton;
+    public Button rotateXButton;
+    public Button rotateYButton;
+    public Button rotateZButton;
+    public Slider rotationSpeedSlider;
+    public TextMeshProUGUI selectedObjectText;
 
     [Header("Categories and Prefabs")]
     public List<Category> categories = new List<Category>();
@@ -37,11 +48,20 @@ public class PlanetEditor : MonoBehaviour
     public Material previewMaterialValid;
     public Material previewMaterialInvalid;
     public LayerMask placementLayer;
+    public float surfaceOffset = 0.1f;
+    public bool stackingAllowed = true;
 
     private GameObject currentPreview;
     private GameObject selectedPrefab;
     private Category selectedCategory;
     private List<GameObject> placedObjects = new List<GameObject>();
+    private bool isInPlacementMode = false;
+
+    private GameObject selectedObject;
+    private bool isDragging = false;
+    private bool isRotating = false;
+    private Vector3 dragOffset;
+    private float rotationSpeed = 45f;
 
     void Start()
     {
@@ -52,6 +72,23 @@ public class PlanetEditor : MonoBehaviour
 
         if (saveButton) saveButton.onClick.AddListener(SaveToPlanetData);
         if (loadButton) loadButton.onClick.AddListener(LoadFromPlanetData);
+
+        SetupManipulationUI();
+
+        if (manipulationPanel) manipulationPanel.SetActive(false);
+    }
+
+    private void SetupManipulationUI()
+    {
+        if (deleteButton) deleteButton.onClick.AddListener(DeleteSelectedObject);
+        if (rotateXButton) rotateXButton.onClick.AddListener(() => RotateSelectedObject(Vector3.right));
+        if (rotateYButton) rotateYButton.onClick.AddListener(() => RotateSelectedObject(Vector3.up));
+        if (rotateZButton) rotateZButton.onClick.AddListener(() => RotateSelectedObject(Vector3.forward));
+        if (rotationSpeedSlider)
+        {
+            rotationSpeedSlider.value = rotationSpeed;
+            rotationSpeedSlider.onValueChanged.AddListener(value => rotationSpeed = value);
+        }
     }
 
     private void SetupUI()
@@ -86,24 +123,263 @@ public class PlanetEditor : MonoBehaviour
 
     private void StartDrag(GameObject prefab, Category category)
     {
+        DeselectObject();
+
         selectedPrefab = prefab;
         selectedCategory = category;
+        isInPlacementMode = true;
+
+        if (PlanetController.Instance != null)
+            PlanetController.Instance.enabled = false;
+
         currentPreview = Instantiate(prefab, Vector3.zero, Quaternion.identity);
         currentPreview.SetActive(true);
+
         Renderer[] renderers = currentPreview.GetComponentsInChildren<Renderer>();
         foreach (var rend in renderers)
             rend.material = previewMaterialValid;
+
         foreach (var col in currentPreview.GetComponentsInChildren<Collider>())
             col.enabled = false;
         foreach (var script in currentPreview.GetComponentsInChildren<MonoBehaviour>())
-            script.enabled = true;
+            script.enabled = false;
     }
 
     void Update()
     {
+        HandleObjectSelection();
+        HandleObjectDragging();
         HandlePlacement();
+
         if (Input.GetMouseButtonUp(0) && currentPreview != null)
             PlaceObjectIfValid();
+
+        if ((Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape)) && currentPreview != null)
+            CancelPlacement();
+
+        if (Input.GetKeyDown(KeyCode.Escape) && selectedObject != null)
+            DeselectObject();
+    }
+
+    private void HandleObjectSelection()
+    {
+        if (Input.GetMouseButtonDown(0) && !isInPlacementMode && !isDragging)
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+                return;
+
+            Ray ray = editorCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                GameObject hitObject = hit.collider.gameObject;
+
+                GameObject placedObject = placedObjects.FirstOrDefault(obj =>
+                    obj == hitObject || (obj != null && hitObject.transform.IsChildOf(obj.transform)));
+
+                if (placedObject != null)
+                {
+                    SelectObject(placedObject);
+                    isInPlacementMode = true;
+                }
+                else
+                    DeselectObject();
+            }
+            else
+                DeselectObject();
+        }
+    }
+
+    private void HandleObjectDragging()
+    {
+        if (selectedObject == null) return;
+
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            Ray ray = editorCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                GameObject hitObject = hit.collider.gameObject;
+                if (hitObject == selectedObject || hitObject.transform.IsChildOf(selectedObject.transform))
+                {
+                    isDragging = true;
+                    dragOffset = selectedObject.transform.position - hit.point;
+                }
+            }
+        }
+
+        if (isDragging && Input.GetMouseButton(0))
+        {
+            Ray ray = editorCamera.ScreenPointToRay(Input.mousePosition);
+            Vector3 newPosition;
+            Vector3 surfaceNormal;
+
+            if (GetSurfacePositionAndNormal(ray, out newPosition, out surfaceNormal))
+            {
+                selectedObject.transform.position = newPosition;
+                selectedObject.transform.up = surfaceNormal;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0))
+            isDragging = false;
+    }
+
+    private bool GetSurfacePositionAndNormal(Ray ray, out Vector3 position, out Vector3 normal)
+    {
+        position = Vector3.zero;
+        normal = Vector3.up;
+
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Infinity);
+        System.Array.Sort(hits, (h1, h2) => h1.distance.CompareTo(h2.distance));
+
+        foreach (var hit in hits)
+        {
+            if (selectedObject != null && (hit.collider.gameObject == selectedObject ||
+                hit.collider.transform.IsChildOf(selectedObject.transform)))
+                continue;
+
+            GameObject hitObject = hit.collider.gameObject;
+            bool isPlacedObject = placedObjects.Contains(hitObject) ||
+                                 placedObjects.Any(obj => obj != null && hit.collider.transform.IsChildOf(obj.transform));
+            bool isPlanet = hitObject == planet.gameObject ||
+                           hit.collider.transform.IsChildOf(planet.transform);
+
+            if ((isPlacedObject && stackingAllowed) || isPlanet)
+            {
+                position = hit.point;
+                normal = hit.normal;
+
+                if (isPlanet && !isPlacedObject)
+                {
+                    Vector3 planetCenter = planet.transform.position;
+                    normal = (hit.point - planetCenter).normalized;
+                }
+
+                position += normal * surfaceOffset;
+                return true;
+            }
+        }
+
+        RaycastHit planetHit;
+        Collider planetCollider = planet.GetComponent<Collider>();
+        if (planetCollider != null && planetCollider.Raycast(ray, out planetHit, Mathf.Infinity))
+        {
+            Vector3 planetCenter = planet.transform.position;
+            position = planetHit.point;
+            normal = (planetHit.point - planetCenter).normalized;
+            position += normal * surfaceOffset;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void SelectObject(GameObject obj)
+    {
+        DeselectObject();
+
+        selectedObject = obj;
+
+        AddSelectionVisual(obj);
+
+        if (manipulationPanel)
+        {
+            manipulationPanel.SetActive(true);
+            if (selectedObjectText)
+                selectedObjectText.text = $"Selected: {obj.name}";
+        }
+    }
+
+    private void DeselectObject()
+    {
+        if (selectedObject != null)
+        {
+            RemoveSelectionVisual(selectedObject);
+            selectedObject = null;
+            isInPlacementMode = false;
+        }
+
+        if (manipulationPanel)
+            manipulationPanel.SetActive(false);
+
+        isDragging = false;
+    }
+
+    private void AddSelectionVisual(GameObject obj)
+    {
+        GameObject selectionIndicator = obj.transform.Find("SelectionIndicator")?.gameObject;
+        if (selectionIndicator == null)
+        {
+            selectionIndicator = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            selectionIndicator.name = "SelectionIndicator";
+            selectionIndicator.transform.SetParent(obj.transform);
+            selectionIndicator.transform.localPosition = Vector3.zero;
+            selectionIndicator.transform.localRotation = Quaternion.identity;
+
+            Bounds bounds = GetObjectBounds(obj);
+            selectionIndicator.transform.localScale = bounds.size * 1.1f;
+
+            DestroyImmediate(selectionIndicator.GetComponent<Collider>());
+            Renderer renderer = selectionIndicator.GetComponent<Renderer>();
+
+            Material wireframeMat = new Material(Shader.Find("Standard"));
+            wireframeMat.color = Color.yellow;
+            wireframeMat.SetFloat("_Mode", 1);
+            wireframeMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            wireframeMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            wireframeMat.SetInt("_ZWrite", 0);
+            wireframeMat.DisableKeyword("_ALPHATEST_ON");
+            wireframeMat.EnableKeyword("_ALPHABLEND_ON");
+            wireframeMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            wireframeMat.renderQueue = 3000;
+            wireframeMat.color = new Color(1, 1, 0, 0.3f);
+
+            renderer.material = wireframeMat;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+        }
+    }
+
+    private void RemoveSelectionVisual(GameObject obj)
+    {
+        GameObject selectionIndicator = obj.transform.Find("SelectionIndicator")?.gameObject;
+        if (selectionIndicator != null)
+            DestroyImmediate(selectionIndicator);
+    }
+
+    private Bounds GetObjectBounds(GameObject obj)
+    {
+        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0)
+            return new Bounds(obj.transform.position, Vector3.one);
+
+        Bounds bounds = renderers[0].bounds;
+        foreach (var renderer in renderers)
+            if (renderer.gameObject.name != "SelectionIndicator")
+                bounds.Encapsulate(renderer.bounds);
+        return bounds;
+    }
+
+    private void DeleteSelectedObject()
+    {
+        if (selectedObject != null)
+        {
+            placedObjects.Remove(selectedObject);
+            DestroyImmediate(selectedObject);
+            DeselectObject();
+        }
+    }
+
+    private void RotateSelectedObject(Vector3 axis)
+    {
+        if (selectedObject != null)
+        {
+            selectedObject.transform.Rotate(axis, rotationSpeed * Time.deltaTime * 10f, Space.Self);
+        }
     }
 
     private void HandlePlacement()
@@ -111,37 +387,16 @@ public class PlanetEditor : MonoBehaviour
         if (selectedPrefab == null || editorCamera == null || currentPreview == null) return;
 
         Ray ray = editorCamera.ScreenPointToRay(Input.mousePosition);
+        Vector3 placementPosition;
+        Vector3 placementNormal;
 
-        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red, 0.1f);
-
-        RaycastHit hit = new RaycastHit();
-        bool didHit = false;
-        if (placementLayer != 0)
+        if (GetSurfacePositionAndNormal(ray, out placementPosition, out placementNormal))
         {
-            didHit = Physics.Raycast(ray, out hit, Mathf.Infinity, placementLayer);
-        }
-        if (!didHit && planet != null)
-        {
-            Collider planetCollider = planet.GetComponent<Collider>();
-            if (planetCollider != null)
-            {
-                didHit = planetCollider.Raycast(ray, out hit, Mathf.Infinity);
-            }
-        }
-        if (!didHit)
-            didHit = Physics.Raycast(ray, out hit, Mathf.Infinity);
-
-        if (didHit)
-        {
-            Vector3 hitPos = hit.point;
-            Vector3 planetCenter = planet.transform.position;
-            Vector3 normal = (hitPos - planetCenter).normalized;
-
             currentPreview.SetActive(true);
-            currentPreview.transform.position = hitPos;
-            currentPreview.transform.up = normal;
+            currentPreview.transform.position = placementPosition;
+            currentPreview.transform.up = placementNormal;
 
-            bool isValid = IsValidPlacement(hitPos);
+            bool isValid = stackingAllowed || IsValidPlacement(placementPosition);
             SetPreviewMaterial(isValid ? previewMaterialValid : previewMaterialInvalid);
         }
         else
@@ -150,7 +405,15 @@ public class PlanetEditor : MonoBehaviour
 
     private bool IsValidPlacement(Vector3 position)
     {
-        return placedObjects.All(obj => obj == null || Vector3.Distance(position, obj.transform.position) >= minPlacementDistance);
+        if (stackingAllowed) return true;
+
+        foreach (var obj in placedObjects)
+        {
+            if (obj == null) continue;
+            if (Vector3.Distance(position, obj.transform.position) < minPlacementDistance)
+                return false;
+        }
+        return true;
     }
 
     private void SetPreviewMaterial(Material material)
@@ -162,7 +425,7 @@ public class PlanetEditor : MonoBehaviour
 
     private void PlaceObjectIfValid()
     {
-        if (currentPreview.activeSelf && IsValidPlacement(currentPreview.transform.position))
+        if (currentPreview.activeSelf && (stackingAllowed || IsValidPlacement(currentPreview.transform.position)))
         {
             GameObject instance = Instantiate(selectedPrefab, currentPreview.transform.position, currentPreview.transform.rotation, planet.transform);
             EditorPlacedItem epi = instance.AddComponent<EditorPlacedItem>();
@@ -170,6 +433,7 @@ public class PlanetEditor : MonoBehaviour
 
             bool isCat = selectedCategory.name == "Cats";
             bool isCatted = selectedCategory.associatedCatPrefab != null;
+
             if (isCatted)
             {
                 CattedObject co = instance.GetComponent<CattedObject>() ?? instance.AddComponent<CattedObject>();
@@ -187,19 +451,33 @@ public class PlanetEditor : MonoBehaviour
                 PlanetObject po = instance.GetComponent<PlanetObject>() ?? instance.AddComponent<PlanetObject>();
                 po.Initialize(planet);
             }
-            Vector3 newScale = new()
-            {
-                x = instance.transform.localScale.x / planet.transform.localScale.x,
-                y = instance.transform.localScale.y / planet.transform.localScale.y,
-                z = instance.transform.localScale.z / planet.transform.localScale.z
-            };
+
+            Vector3 newScale = new Vector3(
+                instance.transform.localScale.x / planet.transform.localScale.x,
+                instance.transform.localScale.y / planet.transform.localScale.y,
+                instance.transform.localScale.z / planet.transform.localScale.z
+            );
             instance.transform.localScale = newScale;
             placedObjects.Add(instance);
         }
-        Destroy(currentPreview);
-        currentPreview = null;
+
+        CancelPlacement();
+    }
+
+    private void CancelPlacement()
+    {
+        if (currentPreview != null)
+        {
+            Destroy(currentPreview);
+            currentPreview = null;
+        }
+
         selectedPrefab = null;
         selectedCategory = null;
+        isInPlacementMode = false;
+
+        if (PlanetController.Instance != null)
+            PlanetController.Instance.enabled = true;
     }
 
     private void AttachCat(CattedObject obj, GameObject catPrefab)
@@ -283,12 +561,13 @@ public class PlanetEditor : MonoBehaviour
                 planet.planetData.placedObjectsToLoad.Add(data);
             }
         }
-
-        Debug.Log("Planet data saved.");
     }
 
     public void LoadFromPlanetData()
     {
+        CancelPlacement();
+        DeselectObject();
+
         foreach (var obj in placedObjects.ToArray())
             if (obj != null)
                 Destroy(obj);
@@ -330,5 +609,10 @@ public class PlanetEditor : MonoBehaviour
             epi.originalCatPrefab = data.catPrefab;
             placedObjects.Add(instance);
         }
+    }
+
+    public bool IsInPlacementMode()
+    {
+        return isInPlacementMode;
     }
 }
