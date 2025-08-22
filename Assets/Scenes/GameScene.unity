@@ -1332,7 +1332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc8465af0de7ad47b45dfa9ebdd723c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  planetData: {fileID: 0}
+  planetData: {fileID: 11400000, guid: 1bf2b5df19e16c34594a3e0add29ef7c, type: 2}
   radius: 5
 --- !u!33 &1012572098
 MeshFilter:
@@ -1523,6 +1523,7 @@ MonoBehaviour:
   previousPlanetButton: {fileID: 353581066}
   mainMenuButton: {fileID: 775995882}
   availablePlanets:
+  - {fileID: 11400000, guid: 1bf2b5df19e16c34594a3e0add29ef7c, type: 2}
   - {fileID: 11400000, guid: 6aae8de352089214f9304642f0b46ca4, type: 2}
 --- !u!4 &1666542404
 Transform:

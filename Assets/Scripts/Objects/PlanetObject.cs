@@ -8,13 +8,10 @@ public class PlanetObject : MonoBehaviour
     public float blockingRadius = 0.5f;
 
     protected Planet parentPlanet;
-    private Vector3 originalScale;
 
     public virtual void Initialize(Planet planet)
     {
         parentPlanet = planet;
-        originalScale = transform.localScale;
-        transform.localScale = originalScale;
     }
 
     protected virtual void PositionOnPlanet()

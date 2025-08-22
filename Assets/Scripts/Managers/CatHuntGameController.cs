@@ -122,14 +122,10 @@ public class CatHuntGameController : Singleton<CatHuntGameController>
 
     void UpdateUI()
     {
-        if (catsFoundText != null)
-            catsFoundText.text = foundCats.Count.ToString();
-        if (totalCatsText != null)
-            totalCatsText.text = allCats.Count.ToString();
-        if (previousPlanetButton != null)
-            previousPlanetButton.interactable = availablePlanets.Length > 1;
-        if (nextPlanetButton != null)
-            nextPlanetButton.interactable = availablePlanets.Length > 1;
+        catsFoundText.text = foundCats.Count.ToString();
+        totalCatsText.text = allCats.Count.ToString();
+        previousPlanetButton.interactable = availablePlanets.Length > 1;
+        nextPlanetButton.interactable = availablePlanets.Length > 1;
     }
 
     public void ResetPlanet()

@@ -452,12 +452,7 @@ public class PlanetEditor : Singleton<PlanetEditor>
                 po.Initialize(planet);
             }
 
-            Vector3 newScale = new Vector3(
-                instance.transform.localScale.x / planet.transform.localScale.x,
-                instance.transform.localScale.y / planet.transform.localScale.y,
-                instance.transform.localScale.z / planet.transform.localScale.z
-            );
-            instance.transform.localScale = newScale;
+            instance.transform.localScale = Planet.Instance.ScaleDownObj(instance.transform.localScale);
             placedObjects.Add(instance);
         }
 
