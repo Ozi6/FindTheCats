@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 [CreateAssetMenu(fileName = "New Planet Data", menuName = "Planet Creation/Planet Data")]
 public class PlanetData : ScriptableObject
@@ -9,8 +10,13 @@ public class PlanetData : ScriptableObject
     public Material planetMaterial;
     public bool hasSplineRoads = false;
 
-    [Header("Object Spawning")]
+    /*[Header("Object Spawning")]
     public List<ObjectSpawnData> objectsToSpawn = new List<ObjectSpawnData>();
     public List<CatSpawnData> catsToSpawn = new List<CatSpawnData>();
-    public List<CattedObjectSpawnData> cattedObjectsToSpawn = new List<CattedObjectSpawnData>();
+    public List<CattedObjectSpawnData> cattedObjectsToSpawn = new List<CattedObjectSpawnData>();*/
+
+    [Header("Placed Items")]
+    public List<PlacedObjectData> placedObjectsToLoad = new List<PlacedObjectData>();
+    public List<PlacedCatData> placedCatsToLoad = new List<PlacedCatData>();
+    public List<PlacedCattedData> placedCattedToLoad = new List<PlacedCattedData>();
 }

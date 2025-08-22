@@ -25,13 +25,16 @@ public class PlanetMeshBuilder
             Object.DestroyImmediate(sphere);
         }
 
-        planet.transform.localScale = Vector3.one * radius;
+        planet.transform.localScale = Vector3.one * radius * 2f;
 
         if (data.planetMaterial != null)
             renderer.material = data.planetMaterial;
 
         var collider = GetOrAdd<SphereCollider>();
         collider.radius = 0.5f;
+        collider.isTrigger = false;
+        if (planet.layer == 0)
+            planet.layer = LayerMask.NameToLayer("Default"); 
     }
 
     private T GetOrAdd<T>() where T : Component =>
