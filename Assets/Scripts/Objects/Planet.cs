@@ -6,6 +6,8 @@ public class Planet : Singleton<Planet>
 {
     protected override bool Persistent => false;
 
+    [SerializeField] private bool editorMode = false;
+
     [Header("Planet Settings")]
     public PlanetData planetData;
     public float radius = 5f;
@@ -17,6 +19,8 @@ public class Planet : Singleton<Planet>
 
     void Start()
     {
+        if(editorMode)
+            GeneratePlanet();
     }
 
     public void GeneratePlanet()

@@ -916,6 +916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc8465af0de7ad47b45dfa9ebdd723c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  editorMode: 1
   planetData: {fileID: 11400000, guid: 1bf2b5df19e16c34594a3e0add29ef7c, type: 2}
   radius: 20
 --- !u!4 &266745072
