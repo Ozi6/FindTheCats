@@ -13,8 +13,56 @@ MonoBehaviour:
   m_Name: TestPlanetData
   m_EditorClassIdentifier: 
   planetRadius: 20
-  planetMaterial: {fileID: 0}
+  planetMaterial: {fileID: 2100000, guid: 1861451f3579adf4a8f427a8ba0aac17, type: 2}
   hasSplineRoads: 0
-  placedObjectsToLoad: []
-  placedCatsToLoad: []
+  placedObjectsToLoad:
+  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
+    localPosition: {x: 0.13316424, y: 0.22625194, z: -0.42846662}
+    localRotation: {x: -0.5003559, y: 0.0016666942, z: -0.15658148, w: 0.8515418}
+  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
+    localPosition: {x: -0.29995367, y: -0.060193505, z: -0.39863607}
+    localRotation: {x: -0.64390284, y: 0.07321366, z: 0.3811602, w: 0.65935254}
+  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
+    localPosition: {x: 0.08796661, y: -0.15199673, z: -0.47081333}
+    localRotation: {x: -0.71338284, y: 0.17550185, z: -0.37726057, w: 0.5638782}
+  - prefab: {fileID: 8938725896016829660, guid: 49adb84804c03bd4aab6e4a1f7498843, type: 3}
+    localPosition: {x: -0.1536506, y: 0.13727616, z: -0.45831537}
+    localRotation: {x: -0.60276335, y: 0.26502523, z: -0.009117235, w: 0.75256556}
+  - prefab: {fileID: 8938725896016829660, guid: 49adb84804c03bd4aab6e4a1f7498843, type: 3}
+    localPosition: {x: -0.17136866, y: -0.21769653, z: -0.41922218}
+    localRotation: {x: -0.83924305, y: 0.2642124, z: -0.11083602, w: 0.4621454}
+  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
+    localPosition: {x: 0.43405762, y: 0.22384755, z: 0.11828973}
+    localRotation: {x: -0.30268762, y: -0.6544031, z: -0.43086702, w: 0.5426698}
+  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
+    localPosition: {x: 0.42115593, y: 0.13786666, z: 0.23691086}
+    localRotation: {x: 0.26687416, y: -0.042606708, z: -0.5399979, w: 0.7970979}
+  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
+    localPosition: {x: 0.4811864, y: 0.12483728, z: 0.07335957}
+    localRotation: {x: -0.21301298, y: -0.3830584, z: -0.57481265, w: 0.6910009}
+  - prefab: {fileID: 8938725896016829660, guid: 49adb84804c03bd4aab6e4a1f7498843, type: 3}
+    localPosition: {x: 0.4112737, y: -0.21994041, z: -0.18704668}
+    localRotation: {x: -0.77300966, y: -0.34988767, z: -0.34828475, w: 0.39841238}
+  - prefab: {fileID: 6608942793463432888, guid: 6b31d0a338b2f18429afa4f0d4cc7269, type: 3}
+    localPosition: {x: 0.04567449, y: -0.09590837, z: 0.4911432}
+    localRotation: {x: -0.036423907, y: -0.6353987, z: -0.7707818, w: 0.028936235}
+  placedCatsToLoad:
+  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
+    localPosition: {x: 0.45467755, y: 0.1557701, z: 0.14666353}
+    localRotation: {x: -0.43646023, y: -0.7386105, z: -0.39307433, w: 0.3308317}
+  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
+    localPosition: {x: 0.40534136, y: -0.18068996, z: -0.23570271}
+    localRotation: {x: -0.80464435, y: -0.4153595, z: -0.17982906, w: 0.38429877}
+  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
+    localPosition: {x: 0.1268446, y: 0.089035645, z: -0.47800562}
+    localRotation: {x: -0.6385126, y: -0.12547733, z: -0.060901936, w: 0.75686735}
+  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
+    localPosition: {x: -0.3300988, y: -0.070221126, z: -0.42486116}
+    localRotation: {x: -0.59114385, y: -0.009871729, z: 0.4587406, w: 0.66333145}
+  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
+    localPosition: {x: 0.12270617, y: 0.25672373, z: -0.4141768}
+    localRotation: {x: -0.46410257, y: 0.05606977, z: -0.17076974, w: 0.8673539}
+  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
+    localPosition: {x: -0.43756104, y: 0.07335567, z: 0.23593555}
+    localRotation: {x: 0.024359047, y: -0.3838469, z: -0.65300524, w: -0.6524204}
   placedCattedToLoad: []
