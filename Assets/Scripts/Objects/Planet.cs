@@ -71,6 +71,7 @@ public class Planet : Singleton<Planet>
             sc.SetPoints(points);
             if (splineData.isClosed)
                 sc.Close();
+            sc.RebuildImmediate();
             SplineRenderer renderer = splineObj.AddComponent<SplineRenderer>();
             renderer.spline = sc;
             renderer.size = 0.2f;

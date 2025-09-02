@@ -16,8 +16,12 @@ MonoBehaviour:
   planetMaterial: {fileID: 2100000, guid: 1861451f3579adf4a8f427a8ba0aac17, type: 2}
   placedObjectsToLoad:
   - prefab: {fileID: 6608942793463432888, guid: 6b31d0a338b2f18429afa4f0d4cc7269, type: 3}
-    localPosition: {x: -0.09829012, y: 0.09569388, z: -0.48274404}
-    localRotation: {x: -0.34380406, y: -0.5523605, z: 0.5353306, w: 0.53862596}
+    localPosition: {x: 0.06517812, y: -0.0049701845, z: -0.54610175}
+    localRotation: {x: 0.007678857, y: 0.699805, z: -0.7102531, w: 0.075859085}
+    assignedSplineIndex: -1
+  - prefab: {fileID: 6608942793463432888, guid: 6b31d0a338b2f18429afa4f0d4cc7269, type: 3}
+    localPosition: {x: 0.10487664, y: -0.33761147, z: -0.35603476}
+    localRotation: {x: 0.6068228, y: -0.2349066, z: 0.6858243, w: -0.3259297}
     assignedSplineIndex: 0
   placedCatsToLoad: []
   placedCattedToLoad: []

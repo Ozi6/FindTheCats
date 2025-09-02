@@ -26,7 +26,11 @@ public class WalkingPerson : AnimatedPlanetObject
             SplineSample projSample = assignedSpline.Project(transform.position);
             currentPercent = projSample.percent;
             splineLength = assignedSpline.CalculateLength();
+            if (splineLength <= 0f)
+                assignedSpline = null;
         }
+        else if (assignedSpline != null)
+            assignedSpline = null;
     }
 
     protected override void UpdateAnimation()
@@ -34,7 +38,7 @@ public class WalkingPerson : AnimatedPlanetObject
         if (parentPlanet == null) return;
         if (assignedSpline != null)
         {
-            float delta = (walkSpeed * Time.deltaTime) / 20;
+            float delta = (walkSpeed * Time.deltaTime) / splineLength;
             if (directionForward)
                 currentPercent += delta;
             else
