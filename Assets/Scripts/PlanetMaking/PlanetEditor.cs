@@ -1,9 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections.Generic;
-using System.Linq;
 
 public class PlanetEditor : Singleton<PlanetEditor>
 {
