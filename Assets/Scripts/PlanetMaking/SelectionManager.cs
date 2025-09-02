@@ -36,18 +36,12 @@ public class SelectionManager
                     obj == hitObject || (obj != null && hitObject.transform.IsChildOf(obj.transform)));
 
                 if (placedObject != null)
-                {
                     SelectObject(placedObject);
-                }
                 else
-                {
                     DeselectObject();
-                }
             }
             else
-            {
                 DeselectObject();
-            }
         }
     }
 
@@ -236,9 +230,7 @@ public class SelectionManager
     public void RotateSelectedObject(Vector3 axis)
     {
         if (selectedObject != null)
-        {
             selectedObject.transform.Rotate(axis, rotationSpeed * Time.deltaTime * 10f, Space.Self);
-        }
     }
 
     public void SetRotationSpeed(float speed)

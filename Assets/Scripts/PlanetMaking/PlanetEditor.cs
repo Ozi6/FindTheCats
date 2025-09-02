@@ -45,6 +45,7 @@ public class PlanetEditor : Singleton<PlanetEditor>
     private SelectionManager selectionManager;
     private EditorUIManager uiManager;
     private EditorDataManager dataManager;
+    private SplineEditorManager splineManager;
 
     private List<GameObject> placedObjects = new List<GameObject>();
 
@@ -63,11 +64,13 @@ public class PlanetEditor : Singleton<PlanetEditor>
         selectionManager = new SelectionManager(this);
         uiManager = new EditorUIManager(this);
         dataManager = new EditorDataManager(this);
+        splineManager = new SplineEditorManager(this);
     }
 
     private void SetupUI()
     {
         uiManager.SetupCategoryUI();
+        splineManager.SetupSplineUI();
     }
 
     private void SetupEventListeners()
@@ -84,6 +87,12 @@ public class PlanetEditor : Singleton<PlanetEditor>
 
     void Update()
     {
+        if (splineManager.IsSplineMode)
+        {
+            splineManager.HandleSplineInput();
+            return;
+        }
+
         selectionManager.HandleObjectSelection();
         selectionManager.HandleObjectDragging();
         placementManager.HandlePlacement();
@@ -128,6 +137,8 @@ public class PlanetEditor : Singleton<PlanetEditor>
     {
         placementManager.CancelPlacement();
         selectionManager.DeselectObject();
+        if (splineManager.IsSplineMode)
+            splineManager.ToggleSplineMode();
         dataManager.LoadFromPlanetData(ref placedObjects);
     }
 
@@ -135,7 +146,9 @@ public class PlanetEditor : Singleton<PlanetEditor>
     {
         return placementManager.IsInPlacementMode;
     }
+
     public List<GameObject> PlacedObjects => placedObjects;
     public PlacementManager PlacementManager => placementManager;
     public SelectionManager SelectionManager => selectionManager;
+    public SplineEditorManager SplineManager => splineManager;
 }

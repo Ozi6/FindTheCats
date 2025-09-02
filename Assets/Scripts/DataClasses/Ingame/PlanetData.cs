@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 [CreateAssetMenu(fileName = "New Planet Data", menuName = "Planet Creation/Planet Data")]
 public class PlanetData : ScriptableObject

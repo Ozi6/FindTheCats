@@ -1,7 +1,7 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using TMPro;
 
 public class EditorUIManager
 {
@@ -20,7 +20,6 @@ public class EditorUIManager
             panel.name = category.name + "Panel";
             TextMeshProUGUI title = panel.GetComponentInChildren<TextMeshProUGUI>();
             if (title) title.text = category.name;
-
             Transform content = panel.transform.Find($"Viewport/Content");
             foreach (var prefab in category.prefabs)
             {
@@ -36,7 +35,11 @@ public class EditorUIManager
                 if (btnText) btnText.text = prefab.name;
                 EventTrigger trigger = button.AddComponent<EventTrigger>();
                 EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.BeginDrag };
-                entry.callback.AddListener((data) => { editor.PlacementManager.StartDrag(prefab, category); });
+                entry.callback.AddListener((data) =>
+                {
+                    if (!editor.SplineManager.IsSplineMode)
+                        editor.PlacementManager.StartDrag(prefab, category);
+                });
                 trigger.triggers.Add(entry);
             }
         }
