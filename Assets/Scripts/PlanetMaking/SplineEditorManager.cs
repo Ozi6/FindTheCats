@@ -179,7 +179,7 @@ public class SplineEditorManager
 
         if (GetPlanetSurfacePosition(ray, out placementPosition, out placementNormal))
         {
-            if (currentPoints.Count >= 3 && IsCloseToFirstPoint(placementPosition))
+            if (currentPoints.Count >= 4 && IsCloseToFirstPoint(placementPosition))
             {
                 CreateLoopedSpline();
                 return;
@@ -244,7 +244,7 @@ public class SplineEditorManager
 
     private bool IsCloseToFirstPoint(Vector3 position)
     {
-        if (currentPoints.Count < 3) return false;
+        if (currentPoints.Count < 4) return false;
 
         float distance = Vector3.Distance(position, currentPoints[0].position);
         return distance <= loopDetectionDistance;
@@ -252,15 +252,50 @@ public class SplineEditorManager
 
     private void CreateLoopedSpline()
     {
-        if (currentSpline != null && currentPoints.Count >= 3)
+        if (currentSpline != null && currentPoints.Count >= 4)
         {
             currentSpline.Close();
-            currentSpline.SetPoints(currentPoints.ToArray());
             FinishCurrentSpline();
         }
     }
 
+    private void InterpolateSplinePoints(bool isClosed)
+    {
+        List<SplinePoint> newPoints = new List<SplinePoint>();
+        int pointCount = currentPoints.Count;
 
+        for (int i = 0; i < pointCount; i++)
+        {
+            newPoints.Add(currentPoints[i]);
+
+            int nextIndex = (i + 1) % pointCount;
+            if (!isClosed && nextIndex == 0) break;
+
+            Vector3 p1 = currentPoints[i].position;
+            Vector3 p2 = currentPoints[nextIndex].position;
+            Vector3 n1 = p1.normalized;
+            Vector3 n2 = p2.normalized;
+            float dot = Vector3.Dot(n1, n2);
+            dot = Mathf.Clamp(dot, -1f, 1f);
+            float angle = Mathf.Acos(dot);
+            int segments = Mathf.Max(1, Mathf.CeilToInt(angle * Mathf.Rad2Deg / 10f)); // Every 10 degrees
+
+            for (int k = 1; k < segments; k++)
+            {
+                float t = k / (float)segments;
+                Vector3 interpDir = Vector3.Slerp(n1, n2, t).normalized;
+                float mag = Mathf.Lerp(p1.magnitude, p2.magnitude, t);
+                Vector3 interpPos = interpDir * mag;
+                SplinePoint sp = new SplinePoint(interpPos);
+                sp.normal = interpDir;
+                sp.size = 1f;
+                sp.color = Color.yellow;
+                newPoints.Add(sp);
+            }
+        }
+
+        currentPoints = newPoints;
+    }
 
     public void ToggleSplineMode()
     {
@@ -295,7 +330,13 @@ public class SplineEditorManager
     public void FinishCurrentSpline()
     {
         if (currentSpline != null && currentPoints.Count >= 2)
+        {
+            bool isClosed = currentSpline.isClosed;
+            InterpolateSplinePoints(isClosed);
             currentSpline.SetPoints(currentPoints.ToArray());
+            if (isClosed)
+                currentSpline.Close();
+        }
         ResetCurrentSpline();
     }
 

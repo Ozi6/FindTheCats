@@ -1,4 +1,6 @@
+using Dreamteck.Splines;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EditorDataManager
@@ -16,6 +18,23 @@ public class EditorDataManager
         editor.planet.planetData.placedObjectsToLoad.Clear();
         editor.planet.planetData.placedCatsToLoad.Clear();
         editor.planet.planetData.placedCattedToLoad.Clear();
+        editor.planet.planetData.placedSplinesToLoad.Clear();
+
+        List<SplineComputer> allSplines = editor.planet.GetComponentsInChildren<SplineComputer>().ToList();
+
+        foreach (var spline in allSplines)
+        {
+            PlacedSplineData splineData = new PlacedSplineData();
+            splineData.isClosed = spline.isClosed;
+            splineData.points = spline.GetPoints().Select(p => new SplinePointData
+            {
+                position = p.position,
+                normal = p.normal,
+                size = p.size,
+                color = p.color
+            }).ToList();
+            editor.planet.planetData.placedSplinesToLoad.Add(splineData);
+        }
 
         foreach (var instance in placedObjects)
         {
@@ -53,8 +72,18 @@ public class EditorDataManager
                 {
                     prefab = epi.originalPrefab,
                     localPosition = localPos,
-                    localRotation = localRot
+                    localRotation = localRot,
+                    assignedSplineIndex = -1
                 };
+                WalkingPerson wp = instance.GetComponent<WalkingPerson>();
+                if (wp != null && wp.assignedSpline != null)
+                {
+                    int index = allSplines.IndexOf(wp.assignedSpline);
+                    if (index >= 0)
+                    {
+                        data.assignedSplineIndex = index;
+                    }
+                }
                 editor.planet.planetData.placedObjectsToLoad.Add(data);
             }
         }
@@ -72,6 +101,29 @@ public class EditorDataManager
         editor.planetSizeSlider.value = editor.planet.radius;
         editor.UpdatePlanetSizeText(editor.planet.radius);
 
+        List<SplineComputer> loadedSplines = new List<SplineComputer>();
+        foreach (var splineData in editor.planet.planetData.placedSplinesToLoad)
+        {
+            GameObject splineObj = new GameObject("PlanetSpline");
+            splineObj.transform.SetParent(editor.planet.transform);
+            SplineComputer sc = splineObj.AddComponent<SplineComputer>();
+            sc.type = Spline.Type.Linear;
+            SplinePoint[] points = splineData.points.Select(d => new SplinePoint
+            {
+                position = d.position,
+                normal = d.normal,
+                size = d.size,
+                color = d.color
+            }).ToArray();
+            sc.SetPoints(points);
+            if (splineData.isClosed)
+                sc.Close();
+            SplineRenderer renderer = splineObj.AddComponent<SplineRenderer>();
+            renderer.spline = sc;
+            renderer.size = 0.2f;
+            loadedSplines.Add(sc);
+        }
+
         foreach (var data in editor.planet.planetData.placedObjectsToLoad)
         {
             var instance = Object.Instantiate(data.prefab, data.localPosition, data.localRotation, editor.planet.transform);
@@ -79,6 +131,14 @@ public class EditorDataManager
             po.Initialize(editor.planet);
             var epi = instance.AddComponent<EditorPlacedItem>();
             epi.originalPrefab = data.prefab;
+            if (data.assignedSplineIndex >= 0 && data.assignedSplineIndex < loadedSplines.Count)
+            {
+                WalkingPerson wp = instance.GetComponent<WalkingPerson>();
+                if (wp != null)
+                {
+                    wp.assignedSpline = loadedSplines[data.assignedSplineIndex];
+                }
+            }
             placedObjects.Add(instance);
         }
 

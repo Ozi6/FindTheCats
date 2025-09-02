@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Dreamteck.Splines;
 
 public class Planet : Singleton<Planet>
 {
@@ -19,7 +20,7 @@ public class Planet : Singleton<Planet>
 
     void Start()
     {
-        if(editorMode)
+        if (editorMode)
             GeneratePlanet();
     }
 
@@ -39,6 +40,10 @@ public class Planet : Singleton<Planet>
             if (comp != null)
                 DestroyImmediate(comp.gameObject);
 
+        foreach (var spline in GetComponentsInChildren<SplineComputer>())
+            if (spline != null)
+                DestroyImmediate(spline.gameObject);
+
         spawnedObjects.Clear();
         spawnedCats.Clear();
         spawnedCattedObjects.Clear();
@@ -48,6 +53,30 @@ public class Planet : Singleton<Planet>
     {
         Vector3 planetScale = transform.localScale;
 
+        List<SplineComputer> loadedSplines = new List<SplineComputer>();
+
+        foreach (var splineData in planetData.placedSplinesToLoad)
+        {
+            GameObject splineObj = new GameObject("PlanetSpline");
+            splineObj.transform.SetParent(transform);
+            SplineComputer sc = splineObj.AddComponent<SplineComputer>();
+            sc.type = Spline.Type.Linear;
+            SplinePoint[] points = splineData.points.Select(d => new SplinePoint
+            {
+                position = d.position,
+                normal = d.normal,
+                size = d.size,
+                color = d.color
+            }).ToArray();
+            sc.SetPoints(points);
+            if (splineData.isClosed)
+                sc.Close();
+            SplineRenderer renderer = splineObj.AddComponent<SplineRenderer>();
+            renderer.spline = sc;
+            renderer.size = 0.2f;
+            loadedSplines.Add(sc);
+        }
+
         foreach (var data in planetData.placedObjectsToLoad)
         {
             Vector3 scaledPosition = ScalePosition(data.localPosition, planetScale);
@@ -55,6 +84,14 @@ public class Planet : Singleton<Planet>
 
             var planetObj = obj.GetComponent<PlanetObject>() ?? obj.AddComponent<PlanetObject>();
             planetObj.transform.localScale = ScaleDownObj(planetObj.transform.localScale);
+
+            if (data.assignedSplineIndex >= 0 && data.assignedSplineIndex < loadedSplines.Count)
+            {
+                var wp = obj.GetComponent<WalkingPerson>();
+                if (wp != null)
+                    wp.assignedSpline = loadedSplines[data.assignedSplineIndex];
+            }
+
             planetObj.Initialize(this);
             spawnedObjects.Add(planetObj);
         }

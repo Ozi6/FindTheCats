@@ -6,4 +6,5 @@ public class PlacedObjectData
     public GameObject prefab;
     public Vector3 localPosition;
     public Quaternion localRotation;
+    public int assignedSplineIndex = -1;
 }

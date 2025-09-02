@@ -1,5 +1,6 @@
 using System.Linq;
 using UnityEngine;
+using Dreamteck.Splines;
 
 public class PlacementManager
 {
@@ -140,10 +141,32 @@ public class PlacementManager
             GameObject instance = Object.Instantiate(selectedPrefab, currentPreview.transform.position, currentPreview.transform.rotation, editor.planet.transform);
             EditorPlacedItem epi = instance.AddComponent<EditorPlacedItem>();
             epi.originalPrefab = selectedPrefab;
-
+            WalkingPerson wp = instance.GetComponent<WalkingPerson>();
+            if (wp != null)
+            {
+                SplineComputer closestSpline = null;
+                float minDist = float.MaxValue;
+                SplineComputer[] allSplines = editor.planet.GetComponentsInChildren<SplineComputer>();
+                foreach (var sc in allSplines)
+                {
+                    SplineSample projSample = sc.Project(instance.transform.position);
+                    float dist = Vector3.Distance(projSample.position, instance.transform.position);
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        closestSpline = sc;
+                    }
+                }
+                if (closestSpline != null && minDist < 0.5f)
+                {
+                    wp.assignedSpline = closestSpline;
+                    SplineSample snapSample = closestSpline.Project(instance.transform.position);
+                    instance.transform.position = snapSample.position;
+                    instance.transform.up = snapSample.up;
+                }
+            }
             bool isCat = selectedCategory.name == "Cats";
             bool isCatted = selectedCategory.associatedCatPrefab != null;
-
             if (isCatted)
             {
                 CattedObject co = instance.GetComponent<CattedObject>() ?? instance.AddComponent<CattedObject>();
@@ -161,11 +184,9 @@ public class PlacementManager
                 PlanetObject po = instance.GetComponent<PlanetObject>() ?? instance.AddComponent<PlanetObject>();
                 po.Initialize(editor.planet);
             }
-
             instance.transform.localScale = Planet.Instance.ScaleDownObj(instance.transform.localScale);
             editor.PlacedObjects.Add(instance);
         }
-
         CancelPlacement();
     }
 
