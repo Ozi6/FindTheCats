@@ -216,7 +216,7 @@ public class SplineEditorManager
         GameObject splineObj = new GameObject("PlanetSpline");
         splineObj.transform.SetParent(editor.planet.transform);
         currentSpline = splineObj.AddComponent<SplineComputer>();
-        currentSpline.type = Spline.Type.Linear;
+        currentSpline.type = Spline.Type.Bezier;
         SplineRenderer renderer = splineObj.AddComponent<SplineRenderer>();
         renderer.spline = currentSpline;
         renderer.size = 0.2f;
@@ -278,7 +278,7 @@ public class SplineEditorManager
             float dot = Vector3.Dot(n1, n2);
             dot = Mathf.Clamp(dot, -1f, 1f);
             float angle = Mathf.Acos(dot);
-            int segments = Mathf.Max(1, Mathf.CeilToInt(angle * Mathf.Rad2Deg / 10f)); // Every 10 degrees
+            int segments = Mathf.Max(1, Mathf.CeilToInt(angle * Mathf.Rad2Deg / 5f));
 
             for (int k = 1; k < segments; k++)
             {
@@ -295,6 +295,50 @@ public class SplineEditorManager
         }
 
         currentPoints = newPoints;
+    }
+
+    private void SetAutoTangents()
+    {
+        if (currentSpline.type != Spline.Type.Bezier) return;
+
+        SplinePoint[] points = currentSpline.GetPoints();
+        int length = points.Length;
+        bool isClosed = currentSpline.isClosed;
+
+        for (int i = 0; i < length; i++)
+        {
+            int prevIndex = (i - 1 + length) % length;
+            int nextIndex = (i + 1) % length;
+
+            if (!isClosed && (i == 0 || i == length - 1))
+            {
+                if (i == 0)
+                {
+                    Vector3 nextt = points[nextIndex].position - points[i].position;
+                    float len = nextt.magnitude / 3f;
+                    points[i].tangent = points[i].position - nextt.normalized * len;
+                    points[i].tangent2 = points[i].position + nextt.normalized * len;
+                }
+                else if (i == length - 1)
+                {
+                    Vector3 prevv = points[prevIndex].position - points[i].position;
+                    float len = prevv.magnitude / 3f;
+                    points[i].tangent = points[i].position - prevv.normalized * len;
+                    points[i].tangent2 = points[i].position + prevv.normalized * len;
+                }
+                continue;
+            }
+
+            Vector3 prev = points[i].position - points[prevIndex].position;
+            Vector3 next = points[nextIndex].position - points[i].position;
+            Vector3 dir = (prev.normalized + next.normalized).normalized;
+            float lengthAvg = (prev.magnitude + next.magnitude) / 6f;
+
+            points[i].tangent = points[i].position - dir * lengthAvg;
+            points[i].tangent2 = points[i].position + dir * lengthAvg;
+        }
+
+        currentSpline.SetPoints(points);
     }
 
     public void ToggleSplineMode()
@@ -336,6 +380,7 @@ public class SplineEditorManager
             currentSpline.SetPoints(currentPoints.ToArray());
             if (isClosed)
                 currentSpline.Close();
+            SetAutoTangents();
         }
         ResetCurrentSpline();
     }

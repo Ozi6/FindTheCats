@@ -60,7 +60,7 @@ public class Planet : Singleton<Planet>
             GameObject splineObj = new GameObject("PlanetSpline");
             splineObj.transform.SetParent(transform);
             SplineComputer sc = splineObj.AddComponent<SplineComputer>();
-            sc.type = Spline.Type.Linear;
+            sc.type = Spline.Type.Bezier;
             SplinePoint[] points = splineData.points.Select(d => new SplinePoint
             {
                 position = d.position,
