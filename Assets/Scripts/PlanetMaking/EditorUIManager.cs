@@ -26,11 +26,6 @@ public class EditorUIManager
                 GameObject button = Object.Instantiate(editor.itemButtonPrefab, content);
                 button.name = prefab.name + "Button";
                 Image img = button.GetComponentInChildren<Image>();
-                if (img && PrefabPreviewGenerator.Instance != null)
-                {
-                    Sprite previewSprite = PrefabPreviewGenerator.Instance.GeneratePreview(prefab);
-                    img.sprite = previewSprite;
-                }
                 TextMeshProUGUI btnText = button.GetComponentInChildren<TextMeshProUGUI>();
                 if (btnText) btnText.text = prefab.name;
                 EventTrigger trigger = button.AddComponent<EventTrigger>();
