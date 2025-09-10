@@ -11,6 +11,14 @@ public class GameManager : Singleton<GameManager>
     public const string gameplayScene = "GameScene";
     public const string settingsScene = "SettingsScene";
 
+    [Header("Planet Management")]
+    public PlanetDatabase planetDatabase;
+    public int CurrentPlanetIndex
+    {
+        get => gameData.currentPlanetIndex;
+        set => gameData.currentPlanetIndex = value;
+    }
+
     private GameState currentGameState = GameState.MainMenu;
 
     public GameState CurrentGameState => currentGameState;
@@ -117,5 +125,45 @@ public class GameManager : Singleton<GameManager>
     {
         Time.timeScale = 1f;
         currentGameState = GameState.Playing;
+    }
+
+    public void PlayLatestPlanet()
+    {
+        int latestUnfinishedIndex = planetDatabase.GetLatestUnfinishedPlanetIndex(gameData.currentPlanetIndex);
+        var planetData = planetDatabase.planets[latestUnfinishedIndex];
+        gameData.currentPlanetIndex = latestUnfinishedIndex;
+        planetDatabase.MarkPlanetStarted(latestUnfinishedIndex);
+        LoadGameplay();
+    }
+
+    public PlanetData GetCurrentPlanetData()
+    {
+        if (planetDatabase != null && gameData.currentPlanetIndex >= 0 &&
+            gameData.currentPlanetIndex < planetDatabase.planets.Count)
+            return planetDatabase.planets[gameData.currentPlanetIndex];
+        return null;
+    }
+
+    public void CompletePlanet(int catsFoundThisLevel = 0)
+    {
+        if (planetDatabase != null && gameData.currentPlanetIndex >= 0)
+        {
+            planetDatabase.MarkPlanetCompleted(gameData.currentPlanetIndex);
+            gameData.totalCatsFound += catsFoundThisLevel;
+            if (gameData.currentPlanetIndex < planetDatabase.planets.Count - 1)
+                gameData.currentPlanetIndex++;
+            SaveGameData();
+        }
+    }
+
+    public void UpdatePlayTime(float deltaTime)
+    {
+        if (currentGameState == GameState.Playing)
+            gameData.totalPlayTime += deltaTime;
+    }
+
+    void Update()
+    {
+        UpdatePlayTime(Time.unscaledDeltaTime);
     }
 }

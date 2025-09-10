@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5602f71b12d2c4643a5f8e8a61514ae4, type: 3}
+  m_Name: PlanetDB
+  m_EditorClassIdentifier: 
+  planets:
+  - {fileID: 11400000, guid: 6aae8de352089214f9304642f0b46ca4, type: 2}
+  - {fileID: 11400000, guid: 1bf2b5df19e16c34594a3e0add29ef7c, type: 2}
+  planetProgress:
+  - hasStarted: 0
+    isCompleted: 0
+    completionTime: 0
+    lastPlayedTime: 0
+    progressPercentage: 0
+  - hasStarted: 0
+    isCompleted: 0
+    completionTime: 0
+    lastPlayedTime: 0
+    progressPercentage: 0
