@@ -66,6 +66,8 @@ public class Planet : Singleton<Planet>
                 position = d.position,
                 normal = d.normal,
                 size = d.size,
+                tangent = d.tangent,
+                tangent2 = d.tangent2,
                 color = d.color
             }).ToArray();
             sc.SetPoints(points);
@@ -82,17 +84,14 @@ public class Planet : Singleton<Planet>
         {
             Vector3 scaledPosition = ScalePosition(data.localPosition, planetScale);
             var obj = Object.Instantiate(data.prefab, scaledPosition, data.localRotation, transform);
-
             var planetObj = obj.GetComponent<PlanetObject>() ?? obj.AddComponent<PlanetObject>();
             planetObj.transform.localScale = ScaleDownObj(planetObj.transform.localScale);
-
             if (data.assignedSplineIndex >= 0 && data.assignedSplineIndex < loadedSplines.Count)
             {
                 var wp = obj.GetComponent<WalkingPerson>();
                 if (wp != null)
                     wp.assignedSpline = loadedSplines[data.assignedSplineIndex];
             }
-
             planetObj.Initialize(this);
             spawnedObjects.Add(planetObj);
         }
@@ -101,7 +100,6 @@ public class Planet : Singleton<Planet>
         {
             Vector3 scaledPosition = ScalePosition(data.localPosition, planetScale);
             var obj = Object.Instantiate(data.catPrefab, scaledPosition, data.localRotation, transform);
-
             var cat = obj.GetComponent<Cat>() ?? obj.AddComponent<Cat>();
             cat.transform.localScale = ScaleDownObj(cat.transform.localScale);
             cat.Initialize(this);
@@ -112,7 +110,6 @@ public class Planet : Singleton<Planet>
         {
             Vector3 scaledPosition = ScalePosition(data.localPosition, planetScale);
             var obj = Object.Instantiate(data.containerPrefab, scaledPosition, data.localRotation, transform);
-
             var special = obj.GetComponent<CattedObject>() ?? obj.AddComponent<CattedObject>();
             AttachCat(special, data.catPrefab);
             special.transform.localScale = ScaleDownObj(special.transform.localScale);

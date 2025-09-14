@@ -30,6 +30,8 @@ public class EditorDataManager
             {
                 position = p.position,
                 normal = p.normal,
+                tangent = p.tangent,
+                tangent2 = p.tangent2,
                 size = p.size,
                 color = p.color
             }).ToList();
