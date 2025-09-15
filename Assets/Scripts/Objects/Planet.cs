@@ -18,6 +18,10 @@ public class Planet : Singleton<Planet>
     public readonly List<Cat> spawnedCats = new();
     public readonly List<CattedObject> spawnedCattedObjects = new();
 
+    private List<Vector3> revealedDirections = new List<Vector3>();
+    private int foundCount = 0;
+    private Material planetMaterial;
+
     void Start()
     {
         if (editorMode)
@@ -32,6 +36,34 @@ public class Planet : Singleton<Planet>
         meshBuilder = new PlanetMeshBuilder(gameObject, planetData, radius);
         meshBuilder.SetupPlanetMesh();
         GenerateFromData();
+        SetupCatListeners();
+    }
+
+    private void SetupCatListeners()
+    {
+        revealedDirections.Clear();
+        foundCount = 0;
+        planetMaterial = GetComponent<MeshRenderer>().material;
+        planetMaterial.SetFloat("_FullReveal", 0f);
+        planetMaterial.SetInt("_PointCount", 0);
+
+        var allCats = GetAllCats();
+        foreach (var cat in allCats)
+            cat.OnCatClicked += HandleCatFound;
+    }
+
+    private void HandleCatFound(Cat cat)
+    {
+        Vector3 dir = cat.transform.localPosition.normalized;
+        if (!revealedDirections.Contains(dir))
+        {
+            revealedDirections.Add(dir);
+            planetMaterial.SetVectorArray("_RevealedPoints", revealedDirections.Select(d => new Vector4(d.x, d.y, d.z, 0)).ToArray());
+            planetMaterial.SetInt("_PointCount", revealedDirections.Count);
+            foundCount++;
+            if (foundCount >= GetAllCats().Count)
+                planetMaterial.SetFloat("_FullReveal", 1f);
+        }
     }
 
     void ClearPlanet()
@@ -122,12 +154,9 @@ public class Planet : Singleton<Planet>
     private void AttachCat(CattedObject obj, GameObject catPrefab)
     {
         if (catPrefab == null) return;
-
         var catObj = Object.Instantiate(catPrefab);
         var cat = catObj.GetComponent<Cat>() ?? catObj.AddComponent<Cat>();
-
         if (obj is CattedObject c) c.associatedCat = cat;
-
         catObj.transform.SetParent(obj.transform);
         catObj.transform.localPosition = Vector3.zero;
         catObj.transform.localRotation = Quaternion.identity;

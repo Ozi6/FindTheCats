@@ -5,8 +5,9 @@ using System.Collections.Generic;
 public class PlanetData : ScriptableObject
 {
     [Header("Planet Properties")]
-    public float planetRadius = 30f;
-    public Material planetMaterial;
+    public float planetRadius = 30f; public Material planetMaterial;
+    [Tooltip("Radius (in radians) for the color reveal effect around each cat")]
+    public float revealRadius = 0.5f;
 
     /*[Header("Object Spawning")]
     public List<ObjectSpawnData> objectsToSpawn = new List<ObjectSpawnData>();

@@ -28,13 +28,22 @@ public class PlanetMeshBuilder
         planet.transform.localScale = Vector3.one * radius * 2f;
 
         if (data.planetMaterial != null)
-            renderer.material = data.planetMaterial;
+        {
+            var revealMat = new Material(Shader.Find("Custom/PlanetReveal"));
+            if (data.planetMaterial.mainTexture != null)
+                revealMat.SetTexture("_MainTex", data.planetMaterial.mainTexture);
+            revealMat.SetColor("_Color", data.planetMaterial.color);
+            revealMat.SetFloat("_RevealRadius", data.revealRadius);
+            revealMat.SetFloat("_FullReveal", 0f);
+            revealMat.SetInt("_PointCount", 0);
+            renderer.material = revealMat;
+        }
 
         var collider = GetOrAdd<SphereCollider>();
         collider.radius = 0.5f;
         collider.isTrigger = false;
         if (planet.layer == 0)
-            planet.layer = LayerMask.NameToLayer("Default"); 
+            planet.layer = LayerMask.NameToLayer("Default");
     }
 
     private T GetOrAdd<T>() where T : Component =>

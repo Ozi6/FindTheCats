@@ -13,32 +13,9 @@ MonoBehaviour:
   m_Name: Planet 1
   m_EditorClassIdentifier: 
   planetRadius: 15
-  planetMaterial: {fileID: 2100000, guid: 1861451f3579adf4a8f427a8ba0aac17, type: 2}
-  hasSplineRoads: 0
-  objectsToSpawn:
-  - prefab: {fileID: 8938725896016829660, guid: 49adb84804c03bd4aab6e4a1f7498843, type: 3}
-    minCount: 2
-    maxCount: 5
-    minDistanceFromOthers: 3
-    canSpawnNearCats: 0
-  - prefab: {fileID: 5705398643522406666, guid: 9578bc9e2d8073f42ad4978e443c6553, type: 3}
-    minCount: 1
-    maxCount: 3
-    minDistanceFromOthers: 5
-    canSpawnNearCats: 0
-  - prefab: {fileID: 6608942793463432888, guid: 6b31d0a338b2f18429afa4f0d4cc7269, type: 3}
-    minCount: 1
-    maxCount: 2
-    minDistanceFromOthers: 5
-    canSpawnNearCats: 0
-  catsToSpawn:
-  - catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
-    count: 6
-    minDistanceFromObjects: 3
-    minDistanceFromOtherCats: 6
-  cattedObjectsToSpawn:
-  - containerPrefab: {fileID: 5548332747921188993, guid: 413c61d5dd5bb464ea6149e7d559e2f6, type: 3}
-    catPrefab: {fileID: 5104486618941627308, guid: ca1afe214bfb0d24ab9ab6a181e042cb, type: 3}
-    count: 1
-    minDistanceFromObjects: 0
-  catHidingObjectsToSpawn: []
+  planetMaterial: {fileID: 2100000, guid: 267981ce440248844a681516553108ba, type: 2}
+  revealRadius: 0.5
+  placedObjectsToLoad: []
+  placedCatsToLoad: []
+  placedCattedToLoad: []
+  placedSplinesToLoad: []
